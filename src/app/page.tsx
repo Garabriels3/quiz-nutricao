@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import Select from '../components/Select';
 import { mockSubjects } from './mocks/dataMocks';
 import { Subject } from './types/models';
+import Link from 'next/link';
 
 const funnyGreetings = [
   "Letícia, pronta para mais um round de 'tortura cerebral nutricional'?",
@@ -67,13 +68,14 @@ export default function Home() {
           >
             {isSubjectSelected ? 'Iniciar Quiz (Boa sorte!)' : 'Selecione uma matéria para começar'}
           </Button>
-          <Button 
-            href="/history" 
-            variant="secondary"
-            fullWidth
-          >
-            Ver Histórico de Quizzes (Relembre o sofrimento)
-          </Button>
+          <Link href="/history" passHref legacyBehavior>
+            <Button
+              variant="secondary"
+              fullWidth
+            >
+              Ver Histórico
+            </Button>
+          </Link>
         </div>
       </main>
       <footer className="mt-8 text-center text-purple-700">

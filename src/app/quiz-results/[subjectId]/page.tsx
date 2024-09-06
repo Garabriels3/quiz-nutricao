@@ -20,8 +20,8 @@ const QuizResultsPage: React.FC<{ params: { subjectId: string } }> = ({ params }
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
 
   useEffect(() => {
-    const answers = searchParams.get('answers');
-    const time = searchParams.get('time');
+    const answers = searchParams?.get('answers');
+    const time = searchParams?.get('time');
 
     if (answers && time) {
       const userAnswers = JSON.parse(answers) as number[];
