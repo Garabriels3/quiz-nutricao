@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getQuestionsBySubject, saveQuizResult } from '../../firebase/firestore';
 import React from 'react';
 import { useQuizStore } from '../../../store/quizStore';
+import { getQuestionsBySubject, saveQuizResult } from '../../firebase/firestore';
 import { Question, QuizResult } from '../../types/models';
 
 
 export default function QuizPage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestionsState] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
@@ -22,19 +22,19 @@ export default function QuizPage() {
 
   const router = useRouter();
   const params = useParams();
-  const { setQuizResult } = useQuizStore();
+  const { setQuizResult, setQuestions: setStoreQuestions } = useQuizStore();
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const fetchedQuestions = await getQuestionsBySubject(params?.subjectId as string);
-        setQuestions(fetchedQuestions);
+        setQuestionsState(fetchedQuestions);
         const now = new Date();
         setStartTime(now);
         setQuestionStartTime(now);
         setLoading(false);
       } catch (err) {
-        setError('Oops! Não conseguimos carregar as questões. Tente novamente mais tarde.');
+        setError('Erro ao carregar as questões. Por favor, tente novamente.');
         setLoading(false);
       }
     };
@@ -67,41 +67,44 @@ export default function QuizPage() {
       setQuestionStartTime(now);
       setSelectedAnswer(null);
     } else {
-      finishQuiz(selectedAnswer, timeSpent);
+      finishQuiz();
     }
   };
 
-  const finishQuiz = (lastOptionIndex: number, lastQuestionTime: number) => {
+  const finishQuiz = async () => {
     const endTime = new Date();
     const totalTime = (endTime.getTime() - startTime.getTime()) / 1000;
     
-    const answers = questions.map((q, index) => ({
-      questionId: q.id,
-      selectedOptionIndex: index === currentQuestionIndex ? lastOptionIndex : userAnswers[index],
-      correct: index === currentQuestionIndex 
-        ? q.options[lastOptionIndex].isCorrect 
-        : q.options[userAnswers[index]].isCorrect,
-      timeSpent: index === currentQuestionIndex ? lastQuestionTime : 0
-    }));
-
-    const score = answers.filter(a => a.correct).length;
-
-    const quizResult: Omit<QuizResult, 'id' | 'date'> = {
-      userId: 'user123', // Replace with actual user ID
+    const quizResult: Omit<QuizResult, 'id'> = {
+      userId: 'user123', // Substitua por um ID de usuário real quando implementar autenticação
       subjectId: params?.subjectId as string,
-      score: score,
+      score: userAnswers.filter((answer, index) => 
+        answer === questions[index].options.findIndex(opt => opt.isCorrect)
+      ).length,
       totalTime: totalTime,
-      answers: answers
+      answers: questions.map((question, index) => ({
+        questionId: question.id,
+        selectedOptionIndex: userAnswers[index] ?? -1, // Use -1 se não houver resposta
+        correct: userAnswers[index] === question.options.findIndex(opt => opt.isCorrect),
+        timeSpent: 0 // Você pode adicionar a lógica para calcular o tempo gasto em cada questão, se necessário
+      })),
+      date: new Date()
     };
 
-    saveQuizResult(quizResult)
-      .then(() => {
-        setQuizResult(quizResult as QuizResult);
-        router.push(`/quiz-results/${params?.subjectId}`);
-      })
-      .catch((err) => {
-        setError('Erro ao salvar o resultado do quiz. Por favor, tente novamente.');
-      });
+    try {
+      // Remova campos undefined ou null
+      const cleanQuizResult = Object.fromEntries(
+        Object.entries(quizResult).filter(([_, v]) => v != null)
+      ) as Omit<QuizResult, 'id'>;
+
+      await saveQuizResult(cleanQuizResult);
+      setQuizResult(cleanQuizResult as QuizResult);
+      setStoreQuestions(questions);
+      router.push(`/quiz-results/${params?.subjectId}`);
+    } catch (error) {
+      console.error('Erro ao salvar o resultado do quiz:', error);
+      setError('Erro ao salvar o resultado do quiz. Por favor, tente novamente.');
+    }
   };
 
   const handleCancel = () => {

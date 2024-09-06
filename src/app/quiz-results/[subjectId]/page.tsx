@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Confetti from 'react-confetti';
 import React from 'react';
 import { useQuizStore } from '../../../store/quizStore';
-import { saveQuizResult, getQuestionsBySubject } from '../../firebase/firestore';
 import { QuizResult, Question } from '../../types/models';
 
 export default function QuizResultPage() {
@@ -14,21 +13,15 @@ export default function QuizResultPage() {
   const [foodEmoji, setFoodEmoji] = useState<string>('🍎');
   const params = useParams();
   const router = useRouter();
-  const { quizResult: storeQuizResult } = useQuizStore();
+  const { quizResult: storeQuizResult, questions: storeQuestions } = useQuizStore();
 
   useEffect(() => {
-    if (storeQuizResult) {
-      setQuizResult(storeQuizResult as QuizResult);
-      const { id, date, ...resultToSave } = storeQuizResult as QuizResult;
-      saveQuizResult(resultToSave).catch(error => {
-        console.error("Erro ao salvar o resultado do quiz:", error);
-      });
-
-      // Fetch questions for this subject
-      getQuestionsBySubject(storeQuizResult.subjectId).then(setQuestions);
+    if (storeQuizResult && storeQuestions) {
+      setQuizResult(storeQuizResult);
+      setQuestions(storeQuestions);
     }
     setFoodEmoji(getRandomFoodEmoji());
-  }, [storeQuizResult]);
+  }, [storeQuizResult, storeQuestions]);
 
   if (!quizResult || questions.length === 0) {
     return <div className="flex items-center justify-center h-screen text-2xl animate-pulse">Calculando seu sucesso... 🧮</div>;
@@ -51,7 +44,6 @@ export default function QuizResultPage() {
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
         <div className="p-8">
           <h1 className="text-4xl font-bold text-center mb-6 text-purple-600">Resultados do Quiz {foodEmoji}</h1>
-          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">Veja como você se saiu!</h2>
           
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-pink-600 mb-4">Sua pontuação</h2>
@@ -73,30 +65,44 @@ export default function QuizResultPage() {
             <h3 className="text-2xl font-bold text-purple-600 mb-4">Revisão das Questões</h3>
             {questions.map((question, index) => {
               const userAnswer = quizResult.answers[index];
-              const correctOption = question.options.find(opt => opt.isCorrect);
               return (
                 <div key={question.id} className="bg-gray-50 rounded-lg p-6 shadow">
                   <p className="font-semibold mb-4">{question.question}</p>
-                  {question.options.map((option, optIndex) => (
-                    <div 
-                      key={optIndex}
-                      className={`p-2 rounded mb-2 ${
-                        userAnswer.selectedOptionIndex === optIndex
-                          ? userAnswer.correct
-                            ? 'bg-green-200'
-                            : 'bg-red-200'
-                          : option.isCorrect
-                            ? 'bg-green-200'
-                            : 'bg-gray-100'
-                      }`}
-                    >
-                      {option.text}
-                      {userAnswer.selectedOptionIndex === optIndex && (
-                        <span className="ml-2">{userAnswer.correct ? '✅' : '❌'}</span>
-                      )}
-                      {option.isCorrect && <span className="ml-2">✅</span>}
-                    </div>
-                  ))}
+                  {question.options.map((option, optIndex) => {
+                    const isUserAnswer = userAnswer.selectedOptionIndex === optIndex;
+                    const isCorrectAnswer = option.isCorrect;
+                    
+                    let bgColor = 'bg-gray-100';
+                    let borderColor = '';
+                    let textColor = 'text-gray-700';
+
+                    if (isUserAnswer) {
+                      bgColor = userAnswer.correct ? 'bg-green-200' : 'bg-red-200';
+                      borderColor = userAnswer.correct ? 'border-green-500' : 'border-red-500';
+                      textColor = userAnswer.correct ? 'text-green-700' : 'text-red-700';
+                    } else if (isCorrectAnswer) {
+                      bgColor = 'bg-green-100';
+                      borderColor = 'border-green-500';
+                      textColor = 'text-green-700';
+                    }
+
+                    return (
+                      <div 
+                        key={optIndex}
+                        className={`p-2 rounded mb-2 ${bgColor} ${isUserAnswer || isCorrectAnswer ? `border-2 ${borderColor}` : ''} ${textColor}`}
+                      >
+                        {option.text}
+                        {isUserAnswer && (
+                          <span className="ml-2 font-semibold">
+                            {userAnswer.correct ? '✅ Sua resposta (correta)' : '❌ Sua resposta (incorreta)'}
+                          </span>
+                        )}
+                        {isCorrectAnswer && !isUserAnswer && (
+                          <span className="ml-2 font-semibold">✅ Resposta correta</span>
+                        )}
+                      </div>
+                    );
+                  })}
                   {!userAnswer.correct && (
                     <p className="text-sm text-gray-600 mt-2">
                       Explicação: {question.explanation}

@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, addDoc, query, where, orderBy, limit, QueryConstraint } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { Subject, Question, QuizResult } from '../types/models';
 
 // Function to get all subjects
@@ -18,13 +18,11 @@ export async function getQuestionsBySubject(subjectId: string): Promise<Question
 }
 
 // Function to save quiz result
-export async function saveQuizResult(result: Omit<QuizResult, 'id' | 'date'>): Promise<void> {
+export async function saveQuizResult(result: Omit<QuizResult, 'id'>): Promise<void> {
   try {
     const resultsCollection = collection(db, 'quizResults');
-    await addDoc(resultsCollection, {
-      ...result,
-      date: new Date() // Adiciona a data atual ao resultado
-    });
+    await addDoc(resultsCollection, result); // Não adicionamos a data aqui, pois já está incluída no objeto result
+    console.log("Resultado do quiz salvo com sucesso");
   } catch (error) {
     console.error("Erro ao salvar o resultado do quiz:", error);
     throw error;

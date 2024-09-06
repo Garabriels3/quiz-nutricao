@@ -15,8 +15,7 @@ export default function HistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        // Substitua 'user123' pelo ID real do usuário quando tiver autenticação implementada
-        const quizHistory = await getQuizHistory('user123');
+        const quizHistory = await getQuizHistory('user123'); // Substitua por um ID de usuário real
         setHistory(quizHistory);
         setLoading(false);
       } catch (err) {
@@ -32,12 +31,12 @@ export default function HistoryPage() {
   if (error) return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-200 to-purple-200 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-pink-200 to-purple-200 p-4 md:p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
-        <div className="p-8">
-          <h1 className="text-4xl font-bold mb-6 text-purple-600 text-center">Histórico de Quizzes</h1>
+        <div className="p-6 md:p-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-6 text-purple-600 text-center">Histórico de Quizzes 📊</h1>
           {history.length === 0 ? (
-            <p className="text-center text-gray-600">Você ainda não realizou nenhum quiz.</p>
+            <p className="text-center text-gray-600">Você ainda não realizou nenhum quiz. Que tal começar agora?</p>
           ) : (
             <div className="space-y-6">
               {history.map((quiz) => (

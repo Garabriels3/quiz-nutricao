@@ -22,13 +22,13 @@ export interface QuizResult {
   id: string;
   userId: string;
   subjectId: string;
-  date: Date;
   score: number;
-  totalTime: number; // em segundos
-  answers: Array<{
+  totalTime: number;
+  answers: {
     questionId: string;
     selectedOptionIndex: number;
     correct: boolean;
-    timeSpent: number; // em segundos
-  }>;
+    timeSpent: number;
+  }[];
+  date: Date;
 }
