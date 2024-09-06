@@ -19,11 +19,16 @@ export async function getQuestionsBySubject(subjectId: string): Promise<Question
 
 // Function to save quiz result
 export async function saveQuizResult(result: Omit<QuizResult, 'id' | 'date'>): Promise<void> {
-  const resultsCollection = collection(db, 'quizResults');
-  await addDoc(resultsCollection, {
-    ...result,
-    date: new Date()
-  });
+  try {
+    const resultsCollection = collection(db, 'quizResults');
+    await addDoc(resultsCollection, {
+      ...result,
+      date: new Date() // Adiciona a data atual ao resultado
+    });
+  } catch (error) {
+    console.error("Erro ao salvar o resultado do quiz:", error);
+    throw error;
+  }
 }
 
 // Function to get user's result history
@@ -37,4 +42,25 @@ export async function getResultHistory(userId: string, limitCount = 10): Promise
   );
   const resultsSnapshot = await getDocs(q);
   return resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as QuizResult));
+}
+
+// Function to get quiz history
+export async function getQuizHistory(userId: string, limitCount: number = 10): Promise<QuizResult[]> {
+  try {
+    const resultsCollection = collection(db, 'quizResults');
+    const q = query(
+      resultsCollection,
+      where("userId", "==", userId),
+      orderBy("date", "desc"),
+      limit(limitCount)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as QuizResult));
+  } catch (error) {
+    console.error("Erro ao obter o histórico de quiz:", error);
+    throw error;
+  }
 }

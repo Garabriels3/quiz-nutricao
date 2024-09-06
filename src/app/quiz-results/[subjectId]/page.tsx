@@ -1,68 +1,125 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Confetti from 'react-confetti';
 import React from 'react';
 import { useQuizStore } from '../../../store/quizStore';
-import { QuizResult } from '../../types/models';
+import { saveQuizResult, getQuestionsBySubject } from '../../firebase/firestore';
+import { QuizResult, Question } from '../../types/models';
 
 export default function QuizResultPage() {
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [foodEmoji, setFoodEmoji] = useState<string>('🍎');
   const params = useParams();
+  const router = useRouter();
   const { quizResult: storeQuizResult } = useQuizStore();
 
   useEffect(() => {
     if (storeQuizResult) {
       setQuizResult(storeQuizResult as QuizResult);
+      const { id, date, ...resultToSave } = storeQuizResult as QuizResult;
+      saveQuizResult(resultToSave).catch(error => {
+        console.error("Erro ao salvar o resultado do quiz:", error);
+      });
+
+      // Fetch questions for this subject
+      getQuestionsBySubject(storeQuizResult.subjectId).then(setQuestions);
     }
     setFoodEmoji(getRandomFoodEmoji());
   }, [storeQuizResult]);
 
-  if (!quizResult) {
-    return <div className="text-center p-10 text-2xl animate-pulse">Calculando seu sucesso... 🧮</div>;
+  if (!quizResult || questions.length === 0) {
+    return <div className="flex items-center justify-center h-screen text-2xl animate-pulse">Calculando seu sucesso... 🧮</div>;
   }
 
-  const percentage = ((quizResult.score / quizResult.answers.length) * 100).toFixed(2);
+  const score = quizResult.answers.filter(a => a.correct).length;
+  const totalQuestions = quizResult.answers.length;
+  const percentage = (score / totalQuestions) * 100;
+  const showConfetti = percentage > 70;
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-200 to-purple-200 p-4 flex items-center justify-center">
-      <Confetti />
-      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-pink-200 to-purple-200 p-4">
+      {showConfetti && <Confetti />}
+      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
         <div className="p-8">
-          <h1 className="text-4xl font-bold text-center mb-6 text-purple-600">Resultado do Quiz {foodEmoji}</h1>
-          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">Assunto: {quizResult.subjectId}</h2>
+          <h1 className="text-4xl font-bold text-center mb-6 text-purple-600">Resultados do Quiz {foodEmoji}</h1>
+          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">Veja como você se saiu!</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-pink-100 p-4 rounded-2xl text-center shadow-md">
-              <p className="text-lg font-medium text-pink-600">Tempo total ⏱️</p>
-              <p className="text-xl text-pink-800">{quizResult.totalTime.toFixed(2)} segundos</p>
-            </div>
-            <div className="bg-purple-100 p-4 rounded-2xl text-center shadow-md">
-              <p className="text-lg font-medium text-purple-600">Questões corretas ✅</p>
-              <p className="text-xl text-purple-800">{quizResult.score} de {quizResult.answers.length}</p>
-            </div>
-            <div className="bg-blue-100 p-4 rounded-2xl text-center shadow-md">
-              <p className="text-lg font-medium text-blue-600">Porcentagem de acerto 📊</p>
-              <p className="text-xl text-blue-800">{percentage}%</p>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">Sua pontuação</h2>
+            <p className="text-xl mb-2">
+              Você acertou {score} de {totalQuestions} questões!
+            </p>
+            <p className="text-lg mb-4">
+              Tempo total: {formatDuration(quizResult.totalTime)}
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+              <div
+                className="bg-pink-600 h-2.5 rounded-full"
+                style={{ width: `${percentage}%` }}
+              ></div>
             </div>
           </div>
-          
-          <h3 className="text-2xl font-semibold mb-4 text-purple-600">Detalhes das questões:</h3>
-          {quizResult.answers.map((answer, index) => (
-            <div key={index} className={`mb-4 p-4 rounded-2xl shadow-md ${answer.correct ? 'bg-green-50' : 'bg-red-50'}`}>
-              <p className="font-medium mb-2 text-gray-800">{index + 1}. Questão ID: {answer.questionId}</p>
-              <p className="text-gray-700">Opção selecionada: {answer.selectedOptionIndex + 1}</p>
-              <p className={answer.correct ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
-                {answer.correct ? '✅ Correto!' : '❌ Incorreto'}
-              </p>
-              <p className="text-gray-600">Tempo gasto: {answer.timeSpent.toFixed(2)} segundos</p>
-            </div>
-          ))}
-          
-          <div className="mt-8 text-center text-gray-600">
-            <p className="italic">"O conhecimento é como uma dieta balanceada: quanto mais variado, melhor!" 💖</p>
+
+          <div className="space-y-6 mb-8">
+            <h3 className="text-2xl font-bold text-purple-600 mb-4">Revisão das Questões</h3>
+            {questions.map((question, index) => {
+              const userAnswer = quizResult.answers[index];
+              const correctOption = question.options.find(opt => opt.isCorrect);
+              return (
+                <div key={question.id} className="bg-gray-50 rounded-lg p-6 shadow">
+                  <p className="font-semibold mb-4">{question.question}</p>
+                  {question.options.map((option, optIndex) => (
+                    <div 
+                      key={optIndex}
+                      className={`p-2 rounded mb-2 ${
+                        userAnswer.selectedOptionIndex === optIndex
+                          ? userAnswer.correct
+                            ? 'bg-green-200'
+                            : 'bg-red-200'
+                          : option.isCorrect
+                            ? 'bg-green-200'
+                            : 'bg-gray-100'
+                      }`}
+                    >
+                      {option.text}
+                      {userAnswer.selectedOptionIndex === optIndex && (
+                        <span className="ml-2">{userAnswer.correct ? '✅' : '❌'}</span>
+                      )}
+                      {option.isCorrect && <span className="ml-2">✅</span>}
+                    </div>
+                  ))}
+                  {!userAnswer.correct && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      Explicação: {question.explanation}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => router.push('/')}
+              className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out"
+            >
+              Voltar para o Início
+            </button>
+            <button
+              onClick={() => router.push('/history')}
+              className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out"
+            >
+              Ver Histórico de Quizzes
+            </button>
           </div>
         </div>
       </div>

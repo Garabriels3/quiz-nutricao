@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { getQuestionsBySubject, saveQuizResult } from '../../firebase/firestore';
 import React from 'react';
 import { useQuizStore } from '../../../store/quizStore';
-import { getQuestionsBySubject, saveQuizResult } from '../../firebase/firestore';
 import { Question, QuizResult } from '../../types/models';
 
 
@@ -34,7 +34,7 @@ export default function QuizPage() {
         setQuestionStartTime(now);
         setLoading(false);
       } catch (err) {
-        setError('Oops! As questões estão um pouco tímidas hoje. Vamos tentar de novo?');
+        setError('Oops! Não conseguimos carregar as questões. Tente novamente mais tarde.');
         setLoading(false);
       }
     };
@@ -100,7 +100,7 @@ export default function QuizPage() {
         router.push(`/quiz-results/${params?.subjectId}`);
       })
       .catch((err) => {
-        setError('Uh-oh! Tivemos um probleminha ao salvar seu quiz. Que tal tentar novamente?');
+        setError('Erro ao salvar o resultado do quiz. Por favor, tente novamente.');
       });
   };
 
@@ -110,9 +110,9 @@ export default function QuizPage() {
     }
   };
 
-  if (loading) return <div className="text-center p-10 text-2xl animate-pulse">Preparando as questões... 📚</div>;
-  if (error) return <div className="text-center p-10 text-xl text-red-500">{error}</div>;
-  if (questions.length === 0) return <div className="text-center p-10 text-xl">Nenhuma questão encontrada para este assunto.</div>;
+  if (loading) return <div className="flex items-center justify-center h-screen text-2xl animate-pulse">Preparando as questões... 📚</div>;
+  if (error) return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
+  if (questions.length === 0) return <div className="flex items-center justify-center h-screen text-xl">Nenhuma questão encontrada para este assunto.</div>;
 
   const currentQuestion = questions[currentQuestionIndex];
 
