@@ -1,7 +1,7 @@
 import { db } from './config';
 import { collection, getDocs, addDoc, query, where, orderBy, limit, QueryConstraint } from 'firebase/firestore';
 import { Subject, Question, QuizResult } from '../types/models';
-import { mockSubjects, mockQuestions, mockResults } from '../mocks/dataMocks';
+import { mockSubjects, mockQuestions, mockResults } from '../mocks/dataMocks'; // Certifique-se de que o caminho está correto
 
 // Function to get all subjects
 export async function getSubjects(): Promise<Subject[]> {

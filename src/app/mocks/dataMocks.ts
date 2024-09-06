@@ -1,4 +1,4 @@
-import { Subject, Question } from '../types/models';
+import { Subject, Question, QuizResult } from '../types/models';
 
 export const mockSubjects: Subject[] = [
   { 
@@ -128,4 +128,34 @@ export const mockQuestions: Question[] = [
     explanation: 'O ferro é um componente crucial da hemoglobina, a proteína nos glóbulos vermelhos que transporta oxigênio.',
     estimatedTime: 50
   }
+];
+
+export const mockResults: QuizResult[] = [
+  {
+    id: '1',
+    userId: 'user1',
+    subjectId: '1',
+    date: new Date('2023-05-01'),
+    score: 80,
+    totalTime: 300,
+    answers: [
+      {
+          questionId: '1', selectedOptionIndex: 1, correct: true,
+          timeSpent: 0
+      },
+      {
+          questionId: '2', selectedOptionIndex: 2, correct: false,
+          timeSpent: 0
+      },
+      {
+          questionId: '3', selectedOptionIndex: 0, correct: true,
+          timeSpent: 0
+      },
+      {
+          questionId: '4', selectedOptionIndex: 1, correct: true,
+          timeSpent: 0
+      },
+    ]
+  },
+  // Adicione mais resultados mockados conforme necessário
 ];

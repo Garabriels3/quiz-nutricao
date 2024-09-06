@@ -3,6 +3,35 @@ import React, { useEffect, useRef } from 'react';
 const FireworksAnimation: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  class Particle {
+    x: number;
+    y: number;
+    size: number;
+    speedY: number;
+    color: string;
+
+    constructor(canvas: HTMLCanvasElement) {
+      this.x = Math.random() * canvas.width;
+      this.y = canvas.height + Math.random() * 200;
+      this.size = Math.random() * 3 + 1;
+      this.speedY = -Math.random() * 2 - 1;
+      this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    }
+
+    update() {
+      this.y += this.speedY;
+    }
+
+    draw() {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      ctx!.fillStyle = this.color;
+      ctx!.beginPath();
+      ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx!.fill();
+    }
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -15,47 +44,23 @@ const FireworksAnimation: React.FC = () => {
 
     const particles: Particle[] = [];
 
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedY: number;
-      color: string;
-
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + Math.random() * 200;
-        this.size = Math.random() * 3 + 1;
-        this.speedY = -Math.random() * 2 - 1;
-        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-      }
-
-      update() {
-        this.y += this.speedY;
-      }
-
-      draw() {
-        ctx!.fillStyle = this.color;
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fill();
-      }
-    }
-
     function createParticles() {
-      for (let i = 0; i < 100; i++) {
-        particles.push(new Particle());
+      if (canvas) {
+        for (let i = 0; i < 100; i++) {
+          particles.push(new Particle(canvas));
+        }
       }
     }
-
     function animateParticles() {
-      ctx!.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        if (particles[i].y < 0) {
-          particles.splice(i, 1);
-          i--;
+      if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+          if (particles[i].y < 0) {
+            particles.splice(i, 1);
+            i--;
+          }
         }
       }
       requestAnimationFrame(animateParticles);
