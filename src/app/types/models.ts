@@ -6,16 +6,16 @@ export interface Subject {
 }
 
 export interface Question {
-  id: string;
-  subjectId: string;
-  question: string;
-  options: Array<{
-    text: string;
-    isCorrect: boolean;
-  }>;
-  difficulty: 'fácil' | 'médio' | 'difícil';
-  explanation: string;
-  estimatedTime: number; // em segundos
+    id: string;
+    subjectId: string;
+    question: string;
+    options: Array<{
+      text: string;
+      isCorrect: boolean;
+    }>;
+    difficulty: 'fácil' | 'médio' | 'difícil';
+    explanation: string;
+    estimatedTime: number;
 }
 
 export interface QuizResult {

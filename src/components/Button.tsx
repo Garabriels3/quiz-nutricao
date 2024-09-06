@@ -8,6 +8,7 @@ interface ButtonProps {
   children: React.ReactNode;
   href?: string;
   fullWidth?: boolean;
+  className?: string; // Adicionamos esta linha
 }
 
 const Button: React.FC<ButtonProps> = ({ 
@@ -16,7 +17,8 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'primary', 
   children, 
   href, 
-  fullWidth = false 
+  fullWidth = false,
+  className = '' // Adicionamos esta linha
 }) => {
   const baseClasses = 'px-6 py-3 rounded-md font-medium text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 flex justify-center items-center shadow-md';
   const variantClasses = {
@@ -25,7 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   };
   const widthClass = fullWidth ? 'w-full' : '';
 
-  const classes = `${baseClasses} ${variantClasses[variant]} ${widthClass} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`;
+  const classes = `${baseClasses} ${variantClasses[variant]} ${widthClass} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`;
 
   if (href) {
     return (
