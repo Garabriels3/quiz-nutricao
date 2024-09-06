@@ -1,86 +1,49 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Button from '../components/Button';
-import Select from '../components/Select';
-import { mockSubjects } from './mocks/dataMocks';
-import { Subject } from './types/models';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-const funnyGreetings = [
-  "Letícia, pronta para mais um round de 'tortura cerebral nutricional'?",
-  "Bem-vinda ao show do milhão... de calorias que você vai queimar pensando!",
-  "Prepare-se para o único teste onde 'passar fome' é opcional, mas recomendado!",
-  "Letícia, sua dieta de conhecimento começa agora. Sem pausa para lanche!",
-  "Pronta para provar que seu cérebro não está tão frito quanto aquele último pastel?",
-  "Vamos ver se você consegue digerir essas perguntas melhor que lactose!",
-  "Hora de malhar esses neurônios! Prometo que dói menos que a academia.",
-  "Letícia, seu desafio de hoje: sobreviver a este quiz sem precisar de terapia depois!",
-  "Prepare-se para suar mais respondendo essas perguntas do que na sua última aula prática!",
-  "Bem-vinda ao quiz! Onde as únicas calorias que você vai contar são as do seu esforço mental."
-];
-
-const foodEmojis = ["🍎", "🥑", "🥕", "🍓", "🥦", "🍇", "🍉", "🍋", "🥝", "🍒"];
+import { getSubjects } from '@/app/firebase/firestore';
+import { Subject } from '@/app/types/models';
 
 export default function Home() {
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [greeting, setGreeting] = useState('');
-  const [emoji, setEmoji] = useState('');
-  const router = useRouter();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setGreeting(funnyGreetings[Math.floor(Math.random() * funnyGreetings.length)]);
-    setEmoji(foodEmojis[Math.floor(Math.random() * foodEmojis.length)]);
+    const fetchSubjects = async () => {
+      try {
+        const fetchedSubjects = await getSubjects();
+        setSubjects(fetchedSubjects);
+        setLoading(false);
+      } catch (err) {
+        setError('Erro ao carregar as matérias. Por favor, tente novamente.');
+        setLoading(false);
+      }
+    };
+
+    fetchSubjects();
   }, []);
 
-  const handleStartQuiz = () => {
-    if (selectedSubject) {
-      router.push(`/quiz/${selectedSubject}`);
-    }
-  };
-
-  const isSubjectSelected = selectedSubject !== '';
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-100 to-blue-200 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-      <main className="bg-white bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-lg shadow-lg p-6 sm:p-8 max-w-md w-full transform transition-all duration-300 hover:shadow-xl">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4 animate-bounce">{emoji}</div>
-          <h1 className="text-3xl font-bold text-purple-600 mb-4">Olá, Letícia!</h1>
-          <p className="text-lg text-purple-700 italic px-4 font-light">{greeting}</p>
-        </div>
-        
-        <div className="mb-8">
-          <Select
-            options={mockSubjects.map((subject: Subject) => ({ value: subject.id, label: subject.name }))}
-            value={selectedSubject}
-            onChange={setSelectedSubject}
-            placeholder="Escolha uma matéria (se tiver coragem)"
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <Button 
-            onClick={handleStartQuiz} 
-            disabled={!isSubjectSelected}
-            fullWidth
-          >
-            {isSubjectSelected ? 'Iniciar Quiz (Boa sorte!)' : 'Selecione uma matéria para começar'}
-          </Button>
-          <Link href="/history" passHref legacyBehavior>
-            <Button
-              variant="secondary"
-              fullWidth
-            >
-              Ver Histórico
-            </Button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Escolha uma matéria para o quiz</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {subjects.map((subject) => (
+          <Link href={`/quiz/${subject.id}`} key={subject.id}>
+            <div className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow">
+              <h2 className="text-xl font-semibold mb-2">{subject.name}</h2>
+              <p className="text-gray-600">{subject.description}</p>
+              {subject.category && (
+                <p className="mt-2 text-sm text-gray-500">Categoria: {subject.category}</p>
+              )}
+            </div>
           </Link>
-        </div>
-      </main>
-      <footer className="mt-8 text-center text-purple-700">
-        <p className="font-medium text-sm">Feito com 💖 e litros de café para manter Letícia acordada</p>
-      </footer>
+        ))}
+      </div>
     </div>
   );
 }
