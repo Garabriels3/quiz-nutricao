@@ -3,11 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #8FBC8F;
-  --color-secondary: #98FB98;
-  --color-accent: #3CB371;
-  --color-background: #F0FFF0;
-  --color-text: #2F4F4F;
+  --color-primary: #F9A8D4;
+  --color-secondary: #86EFAC;
+  --color-background: #FDF2F8;
+  --color-text: #4B5563;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,11 +19,14 @@
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Arial', sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
