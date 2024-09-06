@@ -1,41 +1,98 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
+# Misc
 .DS_Store
 *.pem
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# Local env files
 .env*.local
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# firebase keys
-config.ts
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
 
-.vercel
+# IDE
+.vscode/
+.idea/
+
+# Firebase config
+src/app/firebase/config.ts
+
+# Build output
+out/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore o script de upload de questões
+scripts/uploadQuestions.ts
+
+# Ignore o arquivo JSON de questões
+src/app/firebase/questions.json
+
+# Ignore o arquivo de credenciais do Firebase
+C:/Users/Gabriel Nascimento/Downloads/quiz-nutri-leticia-firebase-adminsdk-ryag5-3bfca1834c.json
+
+# Ignore todos os arquivos .env
+.env*
+
+# Dependências
+/node_modules
+
+# Arquivos de build
+/.next
+/out
+
+# Arquivos de cache
+.cache
+.npm
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs e editores
+/.idea
+/.vscode
+*.swp
+*.swo

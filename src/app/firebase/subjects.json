@@ -1,0 +1,34 @@
+{
+  "subjects": [
+    {
+      "id": "nutricao-basica",
+      "name": "Nutrição Básica",
+      "description": "Fundamentos da nutrição e alimentação saudável",
+      "category": "Fundamentos"
+    },
+    {
+      "id": "bioquimica-nutricional",
+      "name": "Bioquímica Nutricional",
+      "description": "Processos bioquímicos relacionados à nutrição",
+      "category": "Ciências Básicas"
+    },
+    {
+      "id": "nutricao-clinica",
+      "name": "Nutrição Clínica",
+      "description": "Aplicação da nutrição no tratamento de doenças",
+      "category": "Aplicação Prática"
+    },
+    {
+      "id": "nutricao-esportiva",
+      "name": "Nutrição Esportiva",
+      "description": "Nutrição aplicada ao desempenho atlético e exercício físico",
+      "category": "Especialidades"
+    },
+    {
+      "id": "nutricao-materno-infantil",
+      "name": "Nutrição Materno-Infantil",
+      "description": "Nutrição durante a gravidez, lactação e primeira infância",
+      "category": "Ciclos da Vida"
+    }
+  ]
+}

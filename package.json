@@ -5,14 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "upload-questions": "ts-node scripts/uploadQuestions.ts",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@types/styled-components": "^5.1.34",
     "firebase": "^10.13.1",
+    "firebase-admin": "^12.4.0",
     "next": "14.2.8",
     "react": "^18",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18",
     "styled-components": "^6.1.13",
     "zustand": "^4.5.5"

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getResultHistory } from '@/app/firebase/firestore';
-import { QuizResult } from '@/app/types/models';
+import React from 'react';
+import { getResultHistory } from '../firebase/firestore';
+import { QuizResult } from '../types/models';
+
 
 export default function HistoryPage() {
   const [quizHistory, setQuizHistory] = useState<QuizResult[]>([]);
