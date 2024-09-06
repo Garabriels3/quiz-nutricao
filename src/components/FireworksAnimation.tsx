@@ -22,13 +22,15 @@ const FireworksAnimation: React.FC = () => {
       this.y += this.speedY;
     }
 
-    draw() {
+    draw(canvasRef: React.RefObject<HTMLCanvasElement>) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
-      ctx!.fillStyle = this.color;
-      ctx!.beginPath();
-      ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx!.fill();
+      if (ctx) {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 
@@ -56,7 +58,7 @@ const FireworksAnimation: React.FC = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = 0; i < particles.length; i++) {
           particles[i].update();
-          particles[i].draw();
+          particles[i].draw(canvasRef);
           if (particles[i].y < 0) {
             particles.splice(i, 1);
             i--;

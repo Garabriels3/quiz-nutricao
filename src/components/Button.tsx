@@ -1,50 +1,56 @@
 import React from 'react';
-import Link from 'next/link';
+import styled from 'styled-components';
 
-interface ButtonProps {
-  onClick?: () => void;
-  disabled?: boolean;
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
-  children: React.ReactNode;
-  href?: string;
   fullWidth?: boolean;
-  className?: string; // Adicionamos esta linha
+  primaryColor?: string;
+  secondaryColor?: string;
+  textColor?: string;
 }
 
-const Button: React.FC<ButtonProps> = ({ 
-  onClick, 
-  disabled = false, 
-  variant = 'primary', 
-  children, 
-  href, 
-  fullWidth = false,
-  className = '' // Adicionamos esta linha
-}) => {
-  const baseClasses = 'px-6 py-3 rounded-md font-medium text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 flex justify-center items-center shadow-md';
-  const variantClasses = {
-    primary: 'bg-purple-400 text-white hover:bg-purple-500 focus:ring-purple-300',
-    secondary: 'bg-pink-300 text-purple-700 hover:bg-pink-400 focus:ring-pink-200'
-  };
-  const widthClass = fullWidth ? 'w-full' : '';
+const StyledButton = styled.button<ButtonProps>`
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: ${({ fullWidth }) => fullWidth ? '100%' : 'auto'};
+  background-color: ${({ variant, primaryColor, secondaryColor }) => 
+    variant === 'secondary' ? secondaryColor : primaryColor};
+  color: ${({ textColor }) => textColor};
 
-  const classes = `${baseClasses} ${variantClasses[variant]} ${widthClass} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`;
-
-  if (href) {
-    return (
-      <Link href={href} className={classes}>
-        {children}
-      </Link>
-    );
+  &:hover {
+    opacity: 0.8;
   }
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const Button: React.FC<ButtonProps> = ({ 
+  children, 
+  variant = 'primary',
+  fullWidth = false,
+  primaryColor = '#3498db',
+  secondaryColor = '#2ecc71',
+  textColor = '#ffffff',
+  ...rest
+}) => {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={classes}
+    <StyledButton 
+      as="button"
+      variant={variant}
+      fullWidth={fullWidth}
+      primaryColor={primaryColor}
+      secondaryColor={secondaryColor}
+      textColor={textColor}
+      {...rest}
     >
       {children}
-    </button>
+    </StyledButton>
   );
 };
 
